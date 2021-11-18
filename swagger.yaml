@@ -1,78 +1,24 @@
 openapi: 3.0.0
+
 info:
-  title: Social App
-  description: First social app api - Sahil Fruitwala
+  title: Learn express and swagger
+  description: Learn all about express and api documentation using swagger.
   version: 1.0.1
+  contact:
+    email: testemail@email.com
+    url: "http://localhost:4000"
 
 servers:
-  - url: http://localhost:4000/api/v1
-    description: Localhost version of api
-  - url: https://localhost:4000/api/v1
-    description: Dummy api URL
-
-components:
-  securitySchemes:
-    BasicAuth:
-      type: http
-      scheme: basic
-    BearerAuth:
-      type: http
-      scheme: bearer
-
-paths:
-  /instagram:
-    get:
-      summary: return username, followers and follows
-      responses:
-        "200": #status code
-          description: returns an object
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  username:
-                    type: string
-                  followers:
-                    type: string
-                  follows:
-                    type: string
-                  date:
-                    type: string
-    post:
-      summary: return username, followers and follows
-      responses:
-        "200": #status code
-          description: returns an object
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  username:
-                    type: string
-                  followers:
-                    type: string
-                  follows:
-                    type: string
-                  date:
-                    type: string
-  /{token}:
-    get:
-      summary: returns same data as token paramter
-      parameters:
-        - name: token
-          default: 5
-          in: path
-          schema:
-            type: string
-      responses:
-        "200": #status code
-          description: returns an object
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  params:
-                    type: string
+  - url: "{protocol}://localhost:4000/api/{version}"
+    description: For localhost
+    variables: 
+      version:
+        enum:
+          - v1
+          - v2
+        default: v1
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
