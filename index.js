@@ -1,71 +1,34 @@
 require("dotenv").config();
-
 const express = require("express");
-const fileUpload = require("express-fileupload");
-const cloudinary = require("cloudinary").v2;
-
+const Razorpay = require('razorpay')
 const app = express();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-});
-
-// view-engine
-app.set("view engine", "ejs");
-
-// middleware
+// middlewares
+app.use(express.static("./public"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(
-  fileUpload({
-    useTempFiles: true,
-    tempFileDir: "/tmp/",
-  })
-);
 
-app.get("/myget", (req, res) => {
-  res.send(req.query);
-});
+// routes
+app.post("/order", async (req, res) => {
+  const amount = req.body.amount;
 
-app.post("/mypost", async (req, res) => {
-  // ! Multiple files handling
-  const imageArray = [];
+  const instance = new Razorpay({
+    key_id: process.env.KEY_ID,
+    key_secret: process.env.KEY_SECRET,
+  });
 
-  if (req.files) {
-    for (const file of req.files.samplefile) {
-      const result = await cloudinary.uploader.upload(file.tempFilePath, {
-        folder: "users",
-      });
-
-      imageArray.push({
-        public_id: result.public_id,
-        secure_url: result.secure_url,
-      });
-    }
-  }
-
-  // ! Single file handling
-  // const file = req.files.samplefile;
-  // const result = await cloudinary.uploader.upload(file.tempFilePath, {
-  //   folder: "users",
-  // });
-
-  details = {
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    imageArray ,
+  const options = {
+    amount: amount * 100,
+    currency: "INR",
+    receipt: "receipt#1",
   };
-  res.send(details);
-});
 
-app.get("/getform", (req, res) => {
-  res.render("getform");
-});
+  const myOrder = await instance.orders.create(options);
 
-app.get("/postform", (req, res) => {
-  res.render("postform");
+  res.status(201).json({
+    success: true,
+    amount: amount,
+    order: myOrder,
+  });
 });
 
 app.listen(4000, () => {
