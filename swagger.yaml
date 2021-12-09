@@ -1,0 +1,80 @@
+openapi: 3.0.0
+
+info:
+  title: E-Commerce Backend API
+  description: API Documentation of LCO E-Commerce Backend.
+  version: 1.0.1
+  contact:
+    email: testemail@email.com
+    url: "http://localhost:4000"
+
+servers:
+  - url: "{protocol}://localhost:4000/api/{version}"
+    description: For localhost
+    variables:
+      version:
+        enum:
+          - v1
+          - v2
+        default: v1
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+paths:
+  /:
+    get:
+      tags:
+        - Home
+      summary: returns a greet message from home route
+      responses:
+        200:
+          description: All good and success
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "my string"
+        400:
+          description: Bad request
+          # content:
+          #   application/json:
+          #     schema:
+          #       type: string
+          #       example: "my string"
+        500:
+          description: Internal server error
+          # content:
+          #   application/json:
+          #     schema:
+          #       type: string
+          #       example: "my string"
+  /dummy:
+    get:
+      tags:
+        - Home
+      summary: returns a greet message from dummy home route
+      responses:
+        200:
+          description: All good and success
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "my string"
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
