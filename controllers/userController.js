@@ -1,12 +1,12 @@
 const User = require("../models/user");
+
 const BigPromise = require("../middlewares/bigPromise");
+
 const CustomError = require("../utils/customError");
 const cookieToken = require("../utils/cookieToken");
-
-const fileUpload = require("express-fileupload");
-const cloudinary = require("cloudinary").v2;
-
 const emailHelper = require("../utils/emailHelper");
+
+const cloudinary = require("cloudinary").v2;
 const crypto = require("crypto");
 
 exports.signup = BigPromise(async (req, res, next) => {
@@ -169,18 +169,16 @@ exports.changePassword = BigPromise(async (req, res, next) => {
 });
 
 exports.updateUserDetails = BigPromise(async (req, res, next) => {
+  const { name, email } = req.body;
 
-  const {name, email} = req.body
-
-  if(!name || !email) {
-    return next(new CustomError("Please provide name and email!", 400))
+  if (!name || !email) {
+    return next(new CustomError("Please provide name and email!", 400));
   }
 
   const newData = {
-    name: name,
-    email: email,
+    name,
+    email,
   };
-  
 
   if (req.files) {
     const imageId = req.user.photo.id;
@@ -204,5 +202,80 @@ exports.updateUserDetails = BigPromise(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
+  });
+});
+
+exports.adminGetAllUsers = BigPromise(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+exports.adminGetOneUsers = BigPromise(async (req, res, next) => {
+  const userId = req.params.id;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return next(new CustomError("User does not exist!", 404));
+  }
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+exports.adminUpdateUserDetails = BigPromise(async (req, res, next) => {
+  const userId = req.params.id;
+
+  const { name, email, role } = req.body;
+
+  if (!name || !email || !role) {
+    return next(new CustomError("Please provide name and email!", 400));
+  }
+
+  const newData = {
+    name,
+    email,
+    role,
+  };
+
+  const user = await User.findByIdAndUpdate(userId, newData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.adminDeleteUser = BigPromise(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new CustomError("User does not exist!", 401));
+  }
+
+  const imageId = user.photo.id;
+  await cloudinary.uploader.destroy(imageId);
+
+  await user.remove();
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.managerGetAllUsers = BigPromise(async (req, res, next) => {
+  const users = await User.find({ role: "user" }, "name email");
+
+  res.status(200).json({
+    success: true,
+    users,
   });
 });
